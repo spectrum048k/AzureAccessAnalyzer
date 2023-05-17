@@ -2,15 +2,33 @@ import az
 import os
 import json
 
+def format_object(obj):
+    return json.dumps(obj, indent=4)
 
-auth_headers = az.get_token_header(
-    os.environ.get("TENANT_ID"), 
-    os.environ.get("CLIENT_ID"), 
-    os.environ.get("CLIENT_SECRET"))
+def main():
+    auth_headers = az.get_token_header(
+        os.environ.get("TENANT_ID"), 
+        os.environ.get("CLIENT_ID"), 
+        os.environ.get("CLIENT_SECRET"))
 
-az = az.AzureAPI(auth_headers)
+    azure = az.AzureAPI(auth_headers)
 
-subs = json.dumps(az.get_subscriptions(), indent=4)
+    subs = azure.get_subscriptions()
+    print(f'subscriptions:\n{0}', format_object(subs))
 
-# print(type(subs))
-print(subs)
+    sub_id = subs[0]['subscriptionId']
+
+    # rgs = azure.get_resource_groups(sub_id)
+    # print(f'resource groups:\n{0}', format_object(rgs))
+    rg = 'rg-app-a-temp'
+    
+    select = 'authorization,caller'
+    select = 'authorization,operationName'
+    # select = None
+    activity_log = azure.get_activity_log(sub_id, '2023-05-01', '2023-05-10',rg, select)
+
+    print(f'activity log:\n{0}', format_object(activity_log))
+
+# Check if the script is being run directly (not imported as a module)
+if __name__ == "__main__":
+    main()

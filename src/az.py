@@ -17,6 +17,7 @@ def get_token_header(tenant_id, client_id, client_secret):
         'grant_type': 'client_credentials',
         'scope': 'https://management.azure.com/.default'
     }
+
     response = requests.post(auth_url, data=data)
     access_token = response.json()['access_token']
 
@@ -38,8 +39,24 @@ class AzureAPI():
         response = requests.get(url, headers=self.auth_headers)
         return response.json()['value']
     
-    def get_resource_groups(self):
+    def get_resource_groups(self, subscription_id):
         """ Get the list of reource groups """
-        url = "https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups?api-version=2020-06-01"
+        url = f"https://management.azure.com/subscriptions/{subscription_id}/resourcegroups?api-version=2020-06-01"
+        response = requests.get(url, headers=self.auth_headers)
+        return response.json()
+    
+    # add an optional parameter to filter by resource group
+    # add an optional parameter to select the fields to return
+    def get_activity_log(self, subscription_id, start_date, end_date, resource_group=None, select=None):
+        """ Get the activity log """
+        filter = f"$filter=eventTimestamp ge '{start_date}' and eventTimestamp le '{end_date}'"
+
+        if resource_group:
+            filter += f" and resourceGroupName eq '{resource_group}' and caller eq 'usera@eoghankennyoutlook.onmicrosoft.com'"
+
+        if select:
+            filter += f"&$select={select}"
+
+        url = f"https://management.azure.com/subscriptions/{subscription_id}/providers/microsoft.insights/eventtypes/management/values?api-version=2017-03-01-preview&{filter}&{select}"
         response = requests.get(url, headers=self.auth_headers)
         return response.json()
