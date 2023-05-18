@@ -1,6 +1,7 @@
 import az
 import os
 import json
+import datetime_helper
 
 def format_object(obj):
     return json.dumps(obj, indent=4)
@@ -21,11 +22,15 @@ def main():
     # rgs = azure.get_resource_groups(sub_id)
     # print(f'resource groups:\n{0}', format_object(rgs))
     rg = 'rg-app-a-temp'
+
+    user_name = 'usera@eoghankennyoutlook.onmicrosoft.com'
     
-    select = 'authorization,caller'
-    select = 'authorization,operationName'
+    select = 'operationName'
     # select = None
-    activity_log = azure.get_activity_log(sub_id, '2023-05-01', '2023-05-10',rg, select)
+
+    start_date, end_date = datetime_helper.get_last_hour()
+
+    activity_log = azure.get_activity_log(sub_id, start_date, end_date, rg, select, user_name)
 
     print(f'activity log:\n{0}', format_object(activity_log))
 
