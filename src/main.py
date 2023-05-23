@@ -16,7 +16,7 @@ def validate_arguments():
     logger.debug(f'Command-line arguments: {args}')
 
     if len(args) < 3:
-        raise Exception('Subscription ID and user name are a required argument')
+        raise Exception('Subscription ID and user name are required arguments')
     
     sub_id = args[1]
     user_name = args[2]
@@ -60,9 +60,6 @@ def main():
         select = None
 
         activity_log = azure.get_activity_log(sub_id, start_date, end_date, rg_name, select, user_name)
-
-        logger.debug(f'activity log response:')
-        logger.debug(format_object(activity_log))
 
         # extract the operation values
         operations = [x['operationName']['value'] for x in activity_log['value']]
