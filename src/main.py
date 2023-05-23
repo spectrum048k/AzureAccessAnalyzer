@@ -50,9 +50,9 @@ def main():
         sub_id, user_name, num_hours, rg_name = validate_arguments()
 
         auth_headers = azure_api_helper.get_token_header(
-        os.environ.get("TENANT_ID"), 
-        os.environ.get("CLIENT_ID"), 
-        os.environ.get("CLIENT_SECRET"))
+            os.environ.get("TENANT_ID"), 
+            os.environ.get("CLIENT_ID"), 
+            os.environ.get("CLIENT_SECRET"))
 
         azure = azure_api.AzureAPI(auth_headers)
 
