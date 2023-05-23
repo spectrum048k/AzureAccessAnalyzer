@@ -1,7 +1,8 @@
-import traceback
-import az
-import os
 import sys
+import traceback
+import azure_api
+import azure_api_helper
+import os
 import json
 import datetime_helper
 from loguru import logger
@@ -48,12 +49,12 @@ def main():
 
         sub_id, user_name, num_hours, rg_name = validate_arguments()
 
-        auth_headers = az.get_token_header(
+        auth_headers = azure_api_helper.get_token_header(
         os.environ.get("TENANT_ID"), 
         os.environ.get("CLIENT_ID"), 
         os.environ.get("CLIENT_SECRET"))
 
-        azure = az.AzureAPI(auth_headers)
+        azure = azure_api.AzureAPI(auth_headers)
 
         start_date, end_date = datetime_helper.get_last_n_hours(num_hours)
         select = None

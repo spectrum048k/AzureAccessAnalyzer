@@ -2,6 +2,8 @@ import datetime
 import requests
 
 def get_token_header(tenant_id, client_id, client_secret):
+    """ Get the authentication headers for the Azure REST API"""
+    
     # check variables are set
     if not tenant_id:
         raise Exception('TENANT_ID environment variable is not set.')
@@ -49,12 +51,10 @@ class AzureAPI():
         response = requests.get(url, headers=self.auth_headers)
         return response.json()
     
-    # add an optional parameter to filter by resource group
-    # add an optional parameter to select the fields to return
-    # add an optional parameter to filter by the caller user name
     def get_activity_log(self, subscription_id:str, start_date:datetime, end_date:datetime,
                          resource_group=None, select=None, userName=None):
-        
+        """ Get the activity log for a subscription between two dates"""
+
         # validate subscription_id is a valid GUID
         self.is_valid_guid(subscription_id)
         
