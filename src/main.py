@@ -5,6 +5,7 @@ import azure_api_helper
 import os
 import json
 import datetime_helper
+import role_helper
 from loguru import logger
 
 def format_object(obj):
@@ -72,6 +73,12 @@ def main():
 
         logger.info(f'List of operations for {user_name} between {start_date} and {end_date}:')
         logger.info(format_object(operations))
+
+        if operations and len(operations) > 0:
+            role = role_helper.create_role(operations)
+            logger.info('Sample role based on actions:')
+            logger.info(format_object(role))
+            
     except Exception as e:
         logger.error(f"Unexpected exception occurred: {e}")
         logger.error(f"Stack trace: {traceback.print_exc()}")

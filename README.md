@@ -26,10 +26,16 @@ For example to configure the log level:
 export LOGURU_LEVEL="INFO"
 ```
 
+## Run tests
+
+```sh
+pytest -v
+```
+
 ## TODO
 
-- add verbose logging of http requests
 - handle paging
 - add mutliple login support
 - compare to existing roles
-- add manageent group support
+- add management group support
+- create an azure package

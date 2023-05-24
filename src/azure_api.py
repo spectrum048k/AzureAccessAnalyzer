@@ -13,8 +13,8 @@ class AzureAPI():
 
     def __init__(self, auth_headers):
         self.auth_headers = auth_headers
-        # http.client.HTTPConnection.debuglevel = 1
-        # http.client.print = self.log_requests
+        http.client.HTTPConnection.debuglevel = 1
+        http.client.print = self.log_requests
     
     def get_subscriptions(self):
         """ Get the list of subscriptions """
