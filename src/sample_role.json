@@ -1,0 +1,18 @@
+{
+  "id": "/providers/Microsoft.Authorization/roleDefinitions/<role-id>",
+  "properties": {
+      "roleName": "sample-role",
+      "description": "sample role description",
+      "assignableScopes": [
+          "/"
+      ],
+      "permissions": [
+          {
+              "actions": [],
+              "notActions": [],
+              "dataActions": [],
+              "notDataActions": []
+          }
+      ]
+  }
+}
