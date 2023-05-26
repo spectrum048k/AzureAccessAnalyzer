@@ -1,8 +1,7 @@
 import sys
 import traceback
+from azure_activity_logs import AzureActivityLogs
 import azure_api
-import azure_api_helper
-import os
 import datetime_helper
 import role_helper
 from loguru import logger
@@ -40,40 +39,37 @@ def validate_arguments():
 
     return sub_id, user_name, num_hours, rg_name
 
+def check_permissions_used():
+    sub_id, user_name, num_hours, rg_name = validate_arguments()
+
+    start_date, end_date = datetime_helper.get_last_n_hours(num_hours)
+    select = None
+
+    az = AzureActivityLogs()
+    activity_log = az.get_activity_log(sub_id, start_date, end_date, rg_name, select, user_name)
+
+    # extract the operation values
+    operations = [x['operationName']['value'] for x in activity_log['value']]
+
+    logger.debug('List of operations:')
+    logger.debug(azure_api.AzureAPI.format_json_object(operations))
+
+    # sort and remove duplicates
+    operations = sorted(list(set(operations)))
+
+    logger.info(f'List of operations for {user_name} between {start_date} and {end_date}:')
+    logger.info(azure_api.AzureAPI.format_json_object(operations))
+
+    if operations and len(operations) > 0:
+        role = role_helper.create_role(operations)
+        logger.info('Sample role based on actions:')
+        logger.info(azure_api.AzureAPI.format_json_object(role))
+
 def main():
     try:
         logger.info("Starting up...")
 
-        sub_id, user_name, num_hours, rg_name = validate_arguments()
-
-        auth_headers = azure_api_helper.get_token_header(
-            os.environ.get("TENANT_ID"), 
-            os.environ.get("CLIENT_ID"), 
-            os.environ.get("CLIENT_SECRET"))
-
-        azure = azure_api.AzureAPI(auth_headers)
-
-        start_date, end_date = datetime_helper.get_last_n_hours(num_hours)
-        select = None
-
-        activity_log = azure.get_activity_log(sub_id, start_date, end_date, rg_name, select, user_name)
-
-        # extract the operation values
-        operations = [x['operationName']['value'] for x in activity_log['value']]
-
-        logger.debug('List of operations:')
-        logger.debug(azure_api_helper.format_object(operations))
-
-        # sort and remove duplicates
-        operations = sorted(list(set(operations)))
-
-        logger.info(f'List of operations for {user_name} between {start_date} and {end_date}:')
-        logger.info(azure_api_helper.format_object(operations))
-
-        if operations and len(operations) > 0:
-            role = role_helper.create_role(operations)
-            logger.info('Sample role based on actions:')
-            logger.info(azure_api_helper.format_object(role))
+        check_permissions_used()
 
     except Exception as e:
         logger.error(f"Unexpected exception occurred: {e}")
