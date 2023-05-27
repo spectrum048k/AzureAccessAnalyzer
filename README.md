@@ -26,6 +26,10 @@ For example to configure the log level:
 export LOGURU_LEVEL="INFO"
 ```
 
+```sh
+export LOGURU_LEVEL="DEBUG"
+```
+
 ## Run tests
 
 ```sh
