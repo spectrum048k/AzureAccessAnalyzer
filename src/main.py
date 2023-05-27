@@ -108,13 +108,13 @@ def main():
         logger.info("Starting up...")
 
         # check if the user has used any actions in the last n hours
-        # check_actions_used()
+        check_actions_used()
 
         # check the role assignments for the subscription
         # check_role_assignments()
 
         # check subs and resource groups
-        check_subs_and_rgs()
+        # check_subs_and_rgs()
     except Exception as e:
         logger.error(f"Unexpected exception occurred: {e}")
         logger.error(f"Stack trace: {traceback.print_exc()}")
