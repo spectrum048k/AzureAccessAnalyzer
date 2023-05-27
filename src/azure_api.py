@@ -17,12 +17,10 @@ class AzureAPI():
         http.client.HTTPSConnection.debuglevel = 1
         http.client.print = self.log_requests
     
-    @staticmethod
-    def format_json_object(obj):
+    def format_json_object(self, obj):
         return json.dumps(obj, indent=4)
 
-    @staticmethod
-    def is_valid_guid(guid):
+    def is_valid_guid(self, guid):
         if not guid or not isinstance(guid, str) or len(guid) != 36:
             raise ValueError('value must be a valid GUID')
         
@@ -42,7 +40,7 @@ class AzureAPI():
             raise ValueError('CLIENT_SECRET environment variable is not set.')
 
         # Get an access token using the client credentials flow
-        auth_url = f'https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token'
+        url = f'https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token'
         data = {
             'client_id': client_id,
             'client_secret': client_secret,
@@ -50,14 +48,32 @@ class AzureAPI():
             'scope': 'https://management.azure.com/.default'
         }
 
-        response = requests.post(auth_url, data=data)
+        response = requests.post(url, data=data)
+
+        self.log_response_info(response)
+
         access_token = response.json()['access_token']
 
         return {'Authorization': f'Bearer {access_token}'}
 
+    def check_response(self, response):
+        """ Check the response status code and return the json body if successful"""
+
+        if response.status_code == http.HTTPStatus.OK:
+            return response.json()
+        else:
+            raise SystemError(f"Response error: {response.text}")
+
     def http_get(self, url):
         """ HTTP GET request """
         response = requests.get(url, headers=self.get_token_header())
+
+        self.log_response_info(response)
+
+        return response
+
+    def log_response_info(self, response):
+        """ log the response return code, headers and body """
 
         logger.debug(f"Response status code: {response.status_code}")
 
@@ -65,31 +81,7 @@ class AzureAPI():
             logger.debug(f"Response ('header:', '{header}:', '{value}')")
 
         logger.debug(f"Response body: {response.text}")
-
-        return response
     
-    def get_subscriptions(self):
-        """ Get the list of subscriptions """
-        url = f"{self.AZURE_REST_API_BASE_URL}/subscriptions?api-version=2021-01-01"
-        response = requests.get(url, headers=self.auth_headers)
-        return response.json()['value']
-    
-    def get_resource_groups(self, subscription_id):
-        # sourcery skip: class-extract-method
-        """ Get the list of resource groups """
-        self.is_valid_guid(subscription_id)
 
-        # build the url using base url, subscription_id and api version
-        url = f"{self.AZURE_REST_API_BASE_URL}/subscriptions/{subscription_id}/resourcegroups?api-version=2020-06-01"
-        response = requests.get(url, headers=self.auth_headers)
-        return response.json()
     
-    # get role assignments for subscription
-    def get_role_assignments(self, subscription_id):    
-        """ Get the role assignments for a subscription """
-        self.is_valid_guid(subscription_id)
 
-        # build the url using base url, subscription_id and api version
-        url = f"{self.AZURE_REST_API_BASE_URL}/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleAssignments?api-version=2022-04-01&$filter=atScope()"
-        response = requests.get(url, headers=self.auth_headers)
-        return response.json()

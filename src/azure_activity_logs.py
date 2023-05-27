@@ -1,7 +1,5 @@
 import datetime
-import http
 from loguru import logger
-import requests
 from azure_api import AzureAPI
 
 class AzureActivityLogs(AzureAPI):
@@ -15,7 +13,7 @@ class AzureActivityLogs(AzureAPI):
         """ Get the activity log for a subscription between two dates"""
 
         # validate subscription_id is a valid GUID
-        AzureAPI.is_valid_guid(subscription_id)
+        super().is_valid_guid(subscription_id)
         
         # validate start_date is before end_date
         if start_date > end_date:
@@ -40,7 +38,4 @@ class AzureActivityLogs(AzureAPI):
 
         response = super().http_get(url)
 
-        if response.status_code == http.HTTPStatus.OK:
-            return response.json()
-        else:
-            raise SystemError(f"Error getting activity log: {response.text}")
+        return super().check_response(response) 
