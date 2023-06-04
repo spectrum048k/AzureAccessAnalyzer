@@ -1,6 +1,13 @@
-# Introduction
+![](https://img.shields.io/github/license/spectrum048k/AzureAccessAnalyzer)
+![](https://img.shields.io/github/repo-size/spectrum048k/AzureAccessAnalyzer)
 
-IAM Access Analyzer for Azure.
+# Azure Access Analyzer
+
+This is an IAM Access Analyzer for Azure. It will return all the actions / permissions used by a given user or service principal between two dates at either subscription or resource group scope.
+
+## Installation
+
+todo
 
 ## Running locally
 
@@ -12,11 +19,13 @@ export CLIENT_ID="<CLIENT_ID>"
 export CLIENT_SECRET="<CLIENT_SECRET>"
 ```
 
-```
+```sh
 python main.py <subscription> <username> <num_hours> <resource_group_name>
 ```
 
-## Setting log level
+## Configuration
+
+### Setting log level
 
 App is using [Loguru](https://loguru.readthedocs.io/en/stable/index.html) so all settings are configurable via environment variables.
 
@@ -30,13 +39,13 @@ export LOGURU_LEVEL="INFO"
 export LOGURU_LEVEL="DEBUG"
 ```
 
-## Run tests
+## Running Tests
 
 ```sh
 pytest -v
 ```
 
-## TODO
+## Roadmap
 
 - handle paging
 - add mutliple login support
