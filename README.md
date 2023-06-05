@@ -1,6 +1,5 @@
 ![](https://img.shields.io/github/license/spectrum048k/AzureAccessAnalyzer)
 ![](https://img.shields.io/github/repo-size/spectrum048k/AzureAccessAnalyzer)
-![](https://img.shields.io/github/pipenv/locked/python-version/spectrum048k/AzureAccessAnalyzer)
 
 # Azure Access Analyzer
 
