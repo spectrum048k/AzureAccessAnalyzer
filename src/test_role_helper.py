@@ -1,6 +1,5 @@
 from role_helper import create_role
 
-
 def test_create_role_with_actions():
     role = create_role(['Microsoft.Resources/subscriptions/resourceGroups/read', 
                  'Microsoft.Resources/subscriptions/resourceGroups/write', 

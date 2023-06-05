@@ -1,6 +1,7 @@
 import http
 import json
 import os
+import uuid
 import requests
 from loguru import logger
 
@@ -21,9 +22,15 @@ class AzureAPI():
         return json.dumps(obj, indent=4)
 
     def is_valid_guid(self, guid):
-        if not guid or not isinstance(guid, str) or len(guid) != 36:
-            raise ValueError('value must be a valid GUID')
-        
+        try:
+            uuid.UUID(guid)
+            return True
+        except Exception:
+            return False
+
+    # test is_valid_guid
+    # assert is_valid_guid('12345678-1234-5678-1234-567812345678') == True
+    
     def get_token_header(self):
         """Gets an access token using the client credentials flow"""
 
@@ -32,9 +39,9 @@ class AzureAPI():
         client_secret = os.environ.get("CLIENT_SECRET")
 
         # check variables are set
-        if not tenant_id and not AzureAPI.is_valid_guid(tenant_id):
+        if not self.is_valid_guid(tenant_id):
             raise ValueError('TENANT_ID environment variable is not set or invalid.')
-        if not client_id and not AzureAPI.is_valid_guid(client_id):
+        if not self.is_valid_guid(client_id):
             raise ValueError('CLIENT_ID environment variable is not set or invalid.')
         if not client_secret:
             raise ValueError('CLIENT_SECRET environment variable is not set.')

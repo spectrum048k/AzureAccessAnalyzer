@@ -1,7 +1,6 @@
 import sys
 import traceback
 from azure_activity_logs import AzureActivityLogs
-import azure_api
 from azure_management import AzureManagement
 from azure_roles import AzureRoles
 import datetime_helper
