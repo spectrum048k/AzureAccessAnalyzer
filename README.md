@@ -7,7 +7,7 @@ This is an IAM Access Analyzer for Azure. It will return all the actions / permi
 
 ## Installation
 
-todo
+This project requires [pipenv](https://pipenv.pypa.io/en/latest/index.html)
 
 ## Running locally
 
@@ -20,7 +20,7 @@ export CLIENT_SECRET="<CLIENT_SECRET>"
 ```
 
 ```sh
-python main.py <subscription> <username> <num_hours> <resource_group_name>
+pipenv run python main.py <subscription> <username> <num_hours> <resource_group_name>
 ```
 
 ## Configuration
@@ -42,7 +42,7 @@ export LOGURU_LEVEL="DEBUG"
 ## Running Tests
 
 ```sh
-pytest -v
+pipenv run pytest -v
 ```
 
 ## Roadmap
@@ -51,4 +51,3 @@ pytest -v
 - add mutliple login support
 - compare to existing roles
 - add management group support
-- create an azure package
