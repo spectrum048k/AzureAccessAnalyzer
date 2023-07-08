@@ -9,6 +9,7 @@ loguru = "==0.7.0"
 requests = "*"
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.11"
