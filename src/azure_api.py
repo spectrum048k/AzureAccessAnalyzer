@@ -5,8 +5,10 @@ import uuid
 import requests
 from loguru import logger
 
-class AzureAPI():
-    """ Wrapper for the Azure REST API"""
+
+class AzureAPI:
+    """Wrapper for the Azure REST API"""
+
     # Note: Azure REST API is used as the Azure Python SDK is not well documented and is inconsistent
     AZURE_REST_API_BASE_URL = "https://management.azure.com"
 
@@ -17,7 +19,7 @@ class AzureAPI():
         http.client.HTTPConnection.debuglevel = 1
         http.client.HTTPSConnection.debuglevel = 1
         http.client.print = self.log_requests
-    
+
     def format_json_object(self, obj):
         return json.dumps(obj, indent=4)
 
@@ -28,9 +30,6 @@ class AzureAPI():
         except Exception:
             return False
 
-    # test is_valid_guid
-    # assert is_valid_guid('12345678-1234-5678-1234-567812345678') == True
-    
     def get_token_header(self):
         """Gets an access token using the client credentials flow"""
 
@@ -40,31 +39,31 @@ class AzureAPI():
 
         # check variables are set
         if not self.is_valid_guid(tenant_id):
-            raise ValueError('TENANT_ID environment variable is not set or invalid.')
+            raise ValueError("TENANT_ID environment variable is not set or invalid.")
         if not self.is_valid_guid(client_id):
-            raise ValueError('CLIENT_ID environment variable is not set or invalid.')
+            raise ValueError("CLIENT_ID environment variable is not set or invalid.")
         if not client_secret:
-            raise ValueError('CLIENT_SECRET environment variable is not set.')
+            raise ValueError("CLIENT_SECRET environment variable is not set.")
 
         # Get an access token using the client credentials flow
-        url = f'https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token'
+        url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
         data = {
-            'client_id': client_id,
-            'client_secret': client_secret,
-            'grant_type': 'client_credentials',
-            'scope': 'https://management.azure.com/.default'
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "grant_type": "client_credentials",
+            "scope": "https://management.azure.com/.default",
         }
 
         response = requests.post(url, data=data)
 
         self.log_response_info(response)
 
-        access_token = response.json()['access_token']
+        access_token = response.json()["access_token"]
 
-        return {'Authorization': f'Bearer {access_token}'}
+        return {"Authorization": f"Bearer {access_token}"}
 
     def check_response(self, response):
-        """ Check the response status code and return the json body if successful"""
+        """Check the response status code and return the json body if successful"""
 
         if response.status_code == http.HTTPStatus.OK:
             return response.json()
@@ -72,7 +71,7 @@ class AzureAPI():
             raise SystemError(f"Response error: {response.text}")
 
     def http_get(self, url):
-        """ HTTP GET request """
+        """HTTP GET request"""
         response = requests.get(url, headers=self.get_token_header())
 
         self.log_response_info(response)
@@ -80,7 +79,7 @@ class AzureAPI():
         return response
 
     def log_response_info(self, response):
-        """ log the response return code, headers and body """
+        """log the response return code, headers and body"""
 
         logger.debug(f"Response status code: {response.status_code}")
 
@@ -88,7 +87,3 @@ class AzureAPI():
             logger.debug(f"Response ('header:', '{header}:', '{value}')")
 
         logger.debug(f"Response body: {response.text}")
-    
-
-    
-
