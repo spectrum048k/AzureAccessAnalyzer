@@ -7,6 +7,7 @@ name = "pypi"
 pytest = "==7.3.1"
 loguru = "==0.7.0"
 requests = "*"
+typer = "*"
 
 [dev-packages]
 black = "*"
