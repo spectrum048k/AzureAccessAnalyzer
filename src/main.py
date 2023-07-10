@@ -2,6 +2,7 @@ import sys
 import traceback
 from azure_activity_logs import AzureActivityLogs
 from azure_management import AzureManagement
+from azure_nsgs import AzureNSG
 from azure_roles import AzureRoles
 import datetime_helper
 import role_helper
@@ -91,33 +92,30 @@ def export_nsg_rules(
     """export the NSG rules for all resource groups under the management group"""
 
     az = AzureManagement()
+    az_nsg = AzureNSG()
 
     # get the subscriptions for the management group
     subscriptions = az.get_subscription(management_group_id)
 
-    logger.info(f"subscriptions: {az.format_json_object(subscriptions)}")
-
     # extract the subscription ids
-    # subscription_ids = [x["subscriptionId"] for x in subscriptions["value"]]
+    subscription_ids = [x["name"] for x in subscriptions["value"]]
 
     # # get the resource groups for each subscription
-    # for sub_id in subscription_ids:
-    #     resource_groups = az.get_resource_groups(sub_id)
+    for sub_id in subscription_ids:
+        nsgs = az_nsg.get_nsgs(sub_id)
 
-    #     # extract the resource group names
-    #     resource_group_names = [x["name"] for x in resource_groups["value"]]
+        # print the number of NSGs
+        logger.info(f"{len(nsgs['value'])} NSGs for subscription {sub_id}")
+        logger.info(az.format_json_object(nsgs['value']))
 
-    #     # get the NSG rules for each resource group
-    #     for rg_name in resource_group_names:
-    #         nsg_rules = az.get_nsg_rules(sub_id, rg_name)
+        # loop through the NSGs and extract the rules
+        for nsg in nsgs['value']:
+            logger.info(az.format_json_object(nsg))
 
-    #         # extract the NSG rules
-    #         nsg_rules = [x["properties"] for x in nsg_rules["value"]]
+            # extract the NSG rules
+            nsg_rules = nsg["properties"]["securityRules"]
 
-    #         logger.info(
-    #             f"NSG rules for subscription {sub_id} and resource group {rg_name}:"
-    #         )
-    #         logger.info(az.format_json_object(nsg_rules))
+            logger.info(az.format_json_object(nsg_rules))
 
 
 def check_role_assignments():
@@ -185,7 +183,8 @@ def main():
         # check_subs_and_rgs()
     except Exception as e:
         logger.error(f"Unexpected exception occurred: {e}")
-        logger.error(f"Stack trace: {traceback.print_exc()}")
+        stacktrace = traceback.format_exc()
+        logger.debug(f"Stack trace: {stacktrace}")
         sys.exit(1)
 
 
