@@ -8,6 +8,7 @@ import datetime_helper
 import role_helper
 from loguru import logger
 import typer
+import re
 
 app = typer.Typer(
     name="AzureAccessAnalyzer",
@@ -106,17 +107,32 @@ def export_nsg_rules(
 
         # print the number of NSGs
         logger.info(f"{len(nsgs['value'])} NSGs for subscription {sub_id}")
-        logger.info(az.format_json_object(nsgs['value']))
+        logger.debug(az.format_json_object(nsgs["value"]))
 
         # loop through the NSGs and extract the rules
-        for nsg in nsgs['value']:
+        for nsg in nsgs["value"]:
             logger.info(az.format_json_object(nsg))
+
+            # get the resource group name
+            if match := re.search(
+                r"/subscriptions/.*/resourceGroups/([^/]+)", nsg['id']
+            ):
+                resource_group_name = match[1]
+                logger.debug(resource_group_name)
+            else:
+                logger.error("Unable to extract resource group name from scope {az.format_json_object(nsg)}}")
 
             # extract the NSG rules
             nsg_rules = nsg["properties"]["securityRules"]
+            logger.debug(az.format_json_object(nsg_rules))
 
-            logger.info(az.format_json_object(nsg_rules))
+            # extract the NSG name
+            nsg_name = nsg["name"]
 
+            # write the NSG rules to a file
+            with open(f"{resource_group_name}-{nsg_name}.json", "w") as f:
+                f.write(az.format_json_object(nsg_rules))
+            
 
 def check_role_assignments():
     sub_id = sys.argv[1]
@@ -169,7 +185,6 @@ def check_subs_and_rgs(subscription_id: str, rg_name: str = None):
         logger.info(
             f"resource groups for subscription {sub_id}: {az.format_json_object(resource_groups)}"
         )
-
 
 def main():
     try:

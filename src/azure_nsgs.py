@@ -1,5 +1,6 @@
 from azure_api import AzureAPI
 
+
 class AzureNSG(AzureAPI):
     """Class to manage NSGs"""
 
@@ -21,7 +22,7 @@ class AzureNSG(AzureAPI):
 
     def get_nsgs(self, subscription_id):
         """Get all the NSGs in a subscription"""
-            
+
         self.is_valid_guid(subscription_id)
 
         # build the url using base url, subscription_id and api version
