@@ -115,12 +115,14 @@ def export_nsg_rules(
 
             # get the resource group name
             if match := re.search(
-                r"/subscriptions/.*/resourceGroups/([^/]+)", nsg['id']
+                r"/subscriptions/.*/resourceGroups/([^/]+)", nsg["id"]
             ):
                 resource_group_name = match[1]
                 logger.debug(resource_group_name)
             else:
-                logger.error("Unable to extract resource group name from scope {az.format_json_object(nsg)}}")
+                logger.error(
+                    "Unable to extract resource group name from scope {az.format_json_object(nsg)}}"
+                )
 
             # extract the NSG rules
             nsg_rules = nsg["properties"]["securityRules"]
@@ -132,7 +134,7 @@ def export_nsg_rules(
             # write the NSG rules to a file
             with open(f"{resource_group_name}-{nsg_name}.json", "w") as f:
                 f.write(az.format_json_object(nsg_rules))
-            
+
 
 def check_role_assignments():
     sub_id = sys.argv[1]
@@ -185,6 +187,7 @@ def check_subs_and_rgs(subscription_id: str, rg_name: str = None):
         logger.info(
             f"resource groups for subscription {sub_id}: {az.format_json_object(resource_groups)}"
         )
+
 
 def main():
     try:
