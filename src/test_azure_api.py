@@ -1,4 +1,4 @@
-from azure_api import AzureAPI
+from src.azure.azure_api import AzureAPI
 
 
 def test_is_valid_guid_true():

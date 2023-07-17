@@ -4,13 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pytest = "==7.3.1"
-loguru = "==0.7.0"
+loguru = "*"
 requests = "*"
 typer = "*"
 
 [dev-packages]
-black = "*"
 
 [requires]
 python_version = "3.11"
