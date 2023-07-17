@@ -1,6 +1,5 @@
 import datetime
-from loguru import logger
-from azure_api import AzureAPI
+from azure.azure_api import AzureAPI
 
 
 class AzureActivityLogs(AzureAPI):

@@ -1,9 +1,9 @@
 import sys
 import traceback
-from azure_activity_logs import AzureActivityLogs
-from azure_management import AzureManagement
-from azure_nsgs import AzureNSG
-from azure_roles import AzureRoles
+from azure.azure_activity_logs import AzureActivityLogs
+from azure.azure_management import AzureManagement
+from azure.azure_nsgs import AzureNSG
+from azure.azure_roles import AzureRoles
 import datetime_helper
 import role_helper
 from loguru import logger
@@ -78,11 +78,6 @@ def check_actions_used(
     )
     logger.info(az.format_json_object(operations))
 
-    if operations and len(operations) > 0:
-        role = role_helper.create_role(operations)
-        logger.info("Sample role based on actions:")
-        logger.info(az.format_json_object(role))
-
 
 @app.command()
 def export_nsg_rules(
@@ -111,7 +106,7 @@ def export_nsg_rules(
 
         # loop through the NSGs and extract the rules
         for nsg in nsgs["value"]:
-            logger.info(az.format_json_object(nsg))
+            logger.debug(az.format_json_object(nsg))
 
             # get the resource group name
             if match := re.search(
@@ -125,15 +120,15 @@ def export_nsg_rules(
                 )
 
             # extract the NSG rules
-            nsg_rules = nsg["properties"]["securityRules"]
-            logger.debug(az.format_json_object(nsg_rules))
+            nsg_security_rules = nsg["properties"]["securityRules"]
+            logger.info(az.format_json_object(nsg_security_rules))
 
             # extract the NSG name
             nsg_name = nsg["name"]
 
             # write the NSG rules to a file
             with open(f"{resource_group_name}-{nsg_name}.json", "w") as f:
-                f.write(az.format_json_object(nsg_rules))
+                f.write(az.format_json_object(nsg_security_rules))
 
 
 def check_role_assignments():
@@ -194,11 +189,6 @@ def main():
         logger.info("Starting up...")
 
         app()
-        # check the role assignments for the subscription
-        # check_role_assignments()
-
-        # check subs and resource groups
-        # check_subs_and_rgs()
     except Exception as e:
         logger.error(f"Unexpected exception occurred: {e}")
         stacktrace = traceback.format_exc()

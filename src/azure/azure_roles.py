@@ -1,4 +1,4 @@
-from azure_api import AzureAPI
+from azure.azure_api import AzureAPI
 
 
 class AzureRoles(AzureAPI):
