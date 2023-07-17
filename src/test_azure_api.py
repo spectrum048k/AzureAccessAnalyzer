@@ -1,5 +1,6 @@
 from src.azure.azure_api import AzureAPI
 
+
 def test_is_valid_guid_true():
     az_api = AzureAPI()
     assert az_api.is_valid_guid("12345678-1234-5678-1234-567812345678") == True
