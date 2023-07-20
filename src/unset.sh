@@ -1,0 +1,5 @@
+#!/bin/bash
+
+unset AZURE_TENANT_ID
+unset AZURE_CLIENT_ID
+unset AZURE_CLIENT_SECRET

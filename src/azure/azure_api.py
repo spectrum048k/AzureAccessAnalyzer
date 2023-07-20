@@ -1,10 +1,9 @@
 import http
 import json
-import os
 import uuid
 import requests
 from loguru import logger
-
+from azure.identity import DefaultAzureCredential
 
 class AzureAPI:
     """Wrapper for the Azure REST API"""
@@ -30,35 +29,20 @@ class AzureAPI:
         except Exception:
             return False
 
+    def get_default_azure_credential(self):
+        """Use DefaultAzureCredential to authenticate"""
+        credential = DefaultAzureCredential()
+
+        # get the access token
+        gettoken = credential.get_token("https://management.azure.com/.default")
+
+        return gettoken.token
+
     def get_token_header(self):
         """Gets an access token using the client credentials flow"""
 
-        tenant_id = os.environ.get("TENANT_ID")
-        client_id = os.environ.get("CLIENT_ID")
-        client_secret = os.environ.get("CLIENT_SECRET")
-
-        # check variables are set
-        if not self.is_valid_guid(tenant_id):
-            raise ValueError("TENANT_ID environment variable is not set or invalid.")
-        if not self.is_valid_guid(client_id):
-            raise ValueError("CLIENT_ID environment variable is not set or invalid.")
-        if not client_secret:
-            raise ValueError("CLIENT_SECRET environment variable is not set.")
-
-        # Get an access token using the client credentials flow
-        url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
-        data = {
-            "client_id": client_id,
-            "client_secret": client_secret,
-            "grant_type": "client_credentials",
-            "scope": "https://management.azure.com/.default",
-        }
-
-        response = requests.post(url, data=data)
-
-        self.log_response_info(response)
-
-        access_token = response.json()["access_token"]
+        # use the default azure credential to login and get an access token
+        access_token = self.get_default_azure_credential()
 
         return {"Authorization": f"Bearer {access_token}"}
 

@@ -11,12 +11,15 @@ This project requires [pipenv](https://pipenv.pypa.io/en/latest/index.html)
 
 ## Running locally
 
-Set the environment variables used:
+App uses the Azure Python SDK [DefaultCredentialClass](https://learn.microsoft.com/en-us/python/api/azure-identity/azure.identity.defaultazurecredential?view=azure-python).
+
+
+If using a service principal the environment variables used are:
 
 ```sh
-export TENANT_ID="<TENANT_ID>"
-export CLIENT_ID="<CLIENT_ID>"
-export CLIENT_SECRET="<CLIENT_SECRET>"
+export AZURE_TENANT_ID="<TENANT_ID>"
+export AZURE_CLIENT_ID="<CLIENT_ID>"
+export AZURE_CLIENT_SECRET="<CLIENT_SECRET>"
 ```
 
 ```sh

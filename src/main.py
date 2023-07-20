@@ -5,7 +5,6 @@ from azure.azure_management import AzureManagement
 from azure.azure_nsgs import AzureNSG
 from azure.azure_roles import AzureRoles
 import datetime_helper
-import role_helper
 from loguru import logger
 import typer
 import re
