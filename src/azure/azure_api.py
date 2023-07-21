@@ -5,6 +5,7 @@ import requests
 from loguru import logger
 from azure.identity import DefaultAzureCredential
 
+
 class AzureAPI:
     """Wrapper for the Azure REST API"""
 

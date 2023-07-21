@@ -15,39 +15,6 @@ app = typer.Typer(
     help="IAM Access Analyzer for Azure",
 )
 
-# def validate_arguments():
-#     # Get the command-line arguments
-#     args = sys.argv
-#     logger.debug(f"Command-line arguments: {args}")
-
-#     if len(args) < 3:
-#         raise ValueError("Subscription ID and user name are required arguments")
-
-#     sub_id = args[1]
-#     user_name = args[2]
-
-#     # check if there is a third argument num hours which should be a positive integer
-#     if len(args) > 3:
-#         try:
-#             num_hours = int(args[3])
-#             if num_hours < 1:
-#                 raise ValueError("num_hours must be a positive integer")
-
-#         except ValueError as e:
-#             raise ValueError("num_hours must be a positive integer") from e
-#     else:
-#         logger.debug("num_hours not specified, defaulting to 1")
-#         num_hours = 1
-
-#     # check fourth optional arument rg_name
-#     if len(args) > 4:
-#         rg_name = args[4]
-#     else:
-#         logger.debug("rg_name not specified, defaulting to None")
-#         rg_name = None
-
-#     return sub_id, user_name, num_hours, rg_name
-
 
 @app.command()
 def check_actions_used(
@@ -89,45 +56,54 @@ def export_nsg_rules(
     az = AzureManagement()
     az_nsg = AzureNSG()
 
-    # get the subscriptions for the management group
-    subscriptions = az.get_subscription(management_group_id)
+    # get each entity under the management group
+    entities_list = az.get_management_group_entities(management_group_id)
+    entities = entities_list["value"]
 
-    # extract the subscription ids
-    subscription_ids = [x["name"] for x in subscriptions["value"]]
+    # get the resource groups for each subscription
+    for entity in entities:
+        if entity["type"] != "Microsoft.Management/managementGroups":
+            sub_id = entity["name"]
+            sub_name = entity["properties"]["displayName"]
+            sub_name_safe_file_name = re.sub(r'[\\/:*?"<>|]', "", sub_name)
+            sub_name_safe_file_name = sub_name_safe_file_name.replace(" ", "-")
 
-    # # get the resource groups for each subscription
-    for sub_id in subscription_ids:
-        nsgs = az_nsg.get_nsgs(sub_id)
+            nsgs = az_nsg.get_nsgs(sub_id)
 
-        # print the number of NSGs
-        logger.info(f"{len(nsgs['value'])} NSGs for subscription {sub_id}")
-        logger.debug(az.format_json_object(nsgs["value"]))
+            # print the number of NSGs
+            logger.info(f"{len(nsgs['value'])} NSGs for subscription {sub_id}")
+            logger.debug(az.format_json_object(nsgs["value"]))
 
-        # loop through the NSGs and extract the rules
-        for nsg in nsgs["value"]:
-            logger.debug(az.format_json_object(nsg))
+            # loop through the NSGs and extract the rules
+            for nsg in nsgs["value"]:
+                logger.debug(az.format_json_object(nsg))
 
-            # get the resource group name
-            if match := re.search(
-                r"/subscriptions/.*/resourceGroups/([^/]+)", nsg["id"]
-            ):
-                resource_group_name = match[1]
-                logger.debug(resource_group_name)
-            else:
-                logger.error(
-                    "Unable to extract resource group name from scope {az.format_json_object(nsg)}}"
-                )
+                # get the resource group name
+                if match := re.search(
+                    r"/subscriptions/.*/resourceGroups/([^/]+)", nsg["id"]
+                ):
+                    resource_group_name = match[1]
+                    logger.debug(resource_group_name)
+                else:
+                    logger.error(
+                        "Unable to extract resource group name from scope {az.format_json_object(nsg)}}"
+                    )
 
-            # extract the NSG rules
-            nsg_security_rules = nsg["properties"]["securityRules"]
-            logger.info(az.format_json_object(nsg_security_rules))
+                # extract the NSG rules
+                nsg_security_rules = nsg["properties"]["securityRules"]
+                logger.info(az.format_json_object(nsg_security_rules))
 
-            # extract the NSG name
-            nsg_name = nsg["name"]
+                # extract the NSG name
+                nsg_name = nsg["name"]
 
-            # write the NSG rules to a file
-            with open(f"{resource_group_name}-{nsg_name}.json", "w") as f:
-                f.write(az.format_json_object(nsg_security_rules))
+                # write the NSG rules to a file
+                with open(
+                    f"{sub_name_safe_file_name}-{resource_group_name}-{nsg_name}.json",
+                    "w",
+                ) as f:
+                    f.write(az.format_json_object(nsg_security_rules))
+        else:
+            logger.info(f"Skipping child management group {entity['name']}")
 
 
 def check_role_assignments():
