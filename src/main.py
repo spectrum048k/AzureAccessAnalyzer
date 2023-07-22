@@ -91,7 +91,7 @@ def export_nsg_rules(
 
                 # extract the NSG rules
                 nsg_security_rules = nsg["properties"]["securityRules"]
-                logger.info(az.format_json_object(nsg_security_rules))
+                logger.debug(az.format_json_object(nsg_security_rules))
 
                 # extract the NSG name
                 nsg_name = nsg["name"]

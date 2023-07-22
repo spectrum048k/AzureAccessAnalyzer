@@ -51,6 +51,5 @@ pipenv run pytest -v
 ## Roadmap
 
 - handle paging
-- add mutliple login support
 - compare to existing roles
 - add management group support
