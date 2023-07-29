@@ -15,6 +15,72 @@ app = typer.Typer(
     help="IAM Access Analyzer for Azure",
 )
 
+@app.command()
+def check_user_role_assignments(
+        object_id: str = typer.Argument(""),
+        management_group_id: str = typer.Argument(""),
+):
+    """ Return all the role assignments for the user or service principal"""
+    az = AzureRoles()
+
+                # get each entity under the management group
+                # entities_list = az.get_management_group_entities(management_group_id)
+                # entities = entities_list["value"]
+
+                # get the resource groups for each subscription
+                # for entity in entities: 
+                #     if entity["type"] != "Microsoft.Management/managementGroups":
+                #         sub_id = entity["name"]
+
+    # role_definitions = az.get_role_definitions()
+    # logger.debug(type(role_definitions))
+
+    role_assignments = az.get_role_assignments_for_user_subscription(object_id, management_group_id)
+    logger.info(f"Found {len(role_assignments['value'])} role assignments for user {object_id} at scope {management_group_id}")
+    logger.info(az.format_json_object(role_assignments))
+
+    output_assignments = {}
+
+    for assignment in role_assignments["value"]:
+        assignment_id = assignment["id"]
+        role_definition_id = assignment["properties"]["roleDefinitionId"]
+        scope = assignment["properties"]["scope"]
+        role_name = None
+
+        if assignment_id not in output_assignments:
+            role_definition = az.get_role_definition(role_definition_id)
+            role_name = role_definition["properties"]["roleName"]
+
+            output_assignments[assignment_id] = {"scope": scope, "roleName": role_name}
+
+    logger.info(az.format_json_object(output_assignments))
+
+@app.command()
+def check_role_assignments(
+    subscription_id: str = typer.Argument("")
+):
+    """ Return all the role assignments for the subscription"""
+
+    az = AzureRoles()
+
+    # list the role assignments for the subscription
+    role_assignments = az.get_role_assignments(subscription_id)
+
+    properties = [x["properties"] for x in role_assignments["value"]]
+
+    # extract the role assignment principalId and principalType from role_assignments
+    result = [
+        {
+            "principalId": x["principalId"],
+            "principalType": x["principalType"],
+            "scope": x["scope"],
+            "roleDefinitionId": x["roleDefinitionId"],
+        }
+        for x in properties
+    ]
+
+    logger.info(f"Found {len(result)} role assignments for subscription {subscription_id}:")
+    logger.info(az.format_json_object(result))
 
 @app.command()
 def check_actions_used(
@@ -23,7 +89,7 @@ def check_actions_used(
     num_hours: int = typer.Argument(1),
     rg_name: str = typer.Argument(None),
 ):
-    """return the actions used by the user in the last n hours"""
+    """Return the actions used by the user or service principal"""
 
     start_date, end_date = datetime_helper.get_last_n_hours(num_hours)
     select = None
@@ -51,7 +117,7 @@ def export_nsg_rules(
         help="The id of the management group to export NSG rules for"
     ),
 ):
-    """export the NSG rules for all resource groups under the management group"""
+    """Export the NSG rules for all resource groups under the management group"""
 
     az = AzureManagement()
     az_nsg = AzureNSG()
@@ -104,31 +170,6 @@ def export_nsg_rules(
                     f.write(az.format_json_object(nsg_security_rules))
         else:
             logger.info(f"Skipping child management group {entity['name']}")
-
-
-def check_role_assignments():
-    sub_id = sys.argv[1]
-
-    az = AzureRoles()
-
-    # list the role assignments for the subscription
-    role_assignments = az.get_role_assignments(sub_id)
-
-    properties = [x["properties"] for x in role_assignments["value"]]
-
-    # extract the role assignment principalId and principalType from role_assignments
-    result = [
-        {
-            "principalId": x["principalId"],
-            "principalType": x["principalType"],
-            "scope": x["scope"],
-            "roleDefinitionId": x["roleDefinitionId"],
-        }
-        for x in properties
-    ]
-
-    logger.info(f"{len(result)} role assignments for subscription {sub_id}:")
-    logger.info(az.format_json_object(result))
 
 
 def check_subs_and_rgs(subscription_id: str, rg_name: str = None):
