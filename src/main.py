@@ -21,38 +21,38 @@ def check_user_role_assignments(
         management_group_id: str = typer.Argument(""),
 ):
     """ Return all the role assignments for the user or service principal"""
+    az_mgmt = AzureManagement()
     az = AzureRoles()
 
-                # get each entity under the management group
-                # entities_list = az.get_management_group_entities(management_group_id)
-                # entities = entities_list["value"]
-
-                # get the resource groups for each subscription
-                # for entity in entities: 
-                #     if entity["type"] != "Microsoft.Management/managementGroups":
-                #         sub_id = entity["name"]
-
-    # role_definitions = az.get_role_definitions()
-    # logger.debug(type(role_definitions))
-
-    role_assignments = az.get_role_assignments_for_user_subscription(object_id, management_group_id)
-    logger.info(f"Found {len(role_assignments['value'])} role assignments for user {object_id} at scope {management_group_id}")
-    logger.info(az.format_json_object(role_assignments))
-
+    # get each entity under the management group
+    entities_list = az_mgmt.get_management_group_entities(management_group_id)
+    entities = entities_list["value"]
     output_assignments = {}
 
-    for assignment in role_assignments["value"]:
-        assignment_id = assignment["id"]
-        role_definition_id = assignment["properties"]["roleDefinitionId"]
-        scope = assignment["properties"]["scope"]
-        role_name = None
+    # get the resource groups for each subscription
+    for entity in entities: 
+        if entity["type"] != "Microsoft.Management/managementGroups":
+            sub_id = entity["name"]
 
-        if assignment_id not in output_assignments:
-            role_definition = az.get_role_definition(role_definition_id)
-            role_name = role_definition["properties"]["roleName"]
+            role_assignments = az.get_role_assignments_for_user_subscription(object_id, sub_id)
+            logger.debug(f"Found {len(role_assignments['value'])} role assignments for user {object_id} at scope {sub_id}")
+            logger.debug(az.format_json_object(role_assignments))
 
-            output_assignments[assignment_id] = {"scope": scope, "roleName": role_name}
+            for assignment in role_assignments["value"]:
+                assignment_id = assignment["id"]
+                role_definition_id = assignment["properties"]["roleDefinitionId"]
+                scope = assignment["properties"]["scope"]
+                role_name = None
 
+                if assignment_id not in output_assignments:
+                    role_definition = az.get_role_definition(role_definition_id)
+                    role_name = role_definition["properties"]["roleName"]
+
+                    output_assignments[assignment_id] = {"scope": scope, "roleName": role_name}
+                else:
+                    logger.debug(f"Duplicate assignment id {assignment_id}")
+
+    logger.info(f"Found {len(output_assignments)} role assignments for user {object_id} at management group {management_group_id}")
     logger.info(az.format_json_object(output_assignments))
 
 @app.command()
