@@ -53,3 +53,14 @@ pipenv run pytest -v
 - handle paging
 - compare to existing roles
 - add management group support
+
+## See Also
+
+Similar projects and services are:
+
+[Permissions.cloud](https://aws.permissions.cloud/), supports AWS, Azure and Google.
+
+[IAM Access Analyzer](https://aws.amazon.com/blogs/security/iam-access-analyzer-makes-it-easier-to-implement-least-privilege-permissions-by-generating-iam-policies-based-on-access-activity/)
+
+[Trailscraper](https://github.com/flosell/trailscraper)
+
