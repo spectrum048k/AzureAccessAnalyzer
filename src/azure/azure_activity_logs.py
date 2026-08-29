@@ -42,10 +42,15 @@ class AzureActivityLogs(AzureAPI):
         if userName:
             filter_param += f" and caller eq '{userName}'"
 
+        query_params = [filter_param]
         if select:
-            filter_param += f"&$select={select}"
+            query_params.append(f"$select={select}")
 
-        url = f"{super().AZURE_REST_API_BASE_URL}/subscriptions/{subscription_id}/providers/microsoft.insights/eventtypes/management/values?api-version=2017-03-01-preview&{filter_param}&{select}"
+        url = (
+            f"{super().AZURE_REST_API_BASE_URL}/subscriptions/{subscription_id}/"
+            "providers/microsoft.insights/eventtypes/management/values?"
+            f"api-version=2017-03-01-preview&{'&'.join(query_params)}"
+        )
 
         response = super().http_get(url)
 

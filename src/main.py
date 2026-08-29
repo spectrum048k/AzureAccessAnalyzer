@@ -137,11 +137,12 @@ def export_nsg_rules(
             nsgs = az_nsg.get_nsgs(sub_id)
 
             # print the number of NSGs
-            logger.info(f"{len(nsgs['value'])} NSGs for subscription {sub_id}")
-            logger.debug(az.format_json_object(nsgs["value"]))
+            nsg_values = nsgs.get("value", [])
+            logger.info(f"{len(nsg_values)} NSGs for subscription {sub_id}")
+            logger.debug(az.format_json_object(nsg_values))
 
             # loop through the NSGs and extract the rules
-            for nsg in nsgs["value"]:
+            for nsg in nsg_values:
                 logger.debug(az.format_json_object(nsg))
 
                 # get the resource group name
@@ -152,11 +153,12 @@ def export_nsg_rules(
                     logger.debug(resource_group_name)
                 else:
                     logger.error(
-                        "Unable to extract resource group name from scope {az.format_json_object(nsg)}}"
+                        f"Unable to extract resource group name from scope {az.format_json_object(nsg)}"
                     )
+                    continue
 
                 # extract the NSG rules
-                nsg_security_rules = nsg["properties"]["securityRules"]
+                nsg_security_rules = nsg.get("properties", {}).get("securityRules", [])
                 logger.debug(az.format_json_object(nsg_security_rules))
 
                 # extract the NSG name

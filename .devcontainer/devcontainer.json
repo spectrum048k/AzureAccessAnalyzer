@@ -1,0 +1,14 @@
+{
+  "name": "AzureAccessAnalyzer Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {},
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.pythonPath": "/usr/local/bin/python"
+      }
+    }
+  },
+  "postCreateCommand": "pip install -r requirements.txt"
+  // "workspaceFolder": "/workspace"
+}
